@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
-import prisma from '@/lib/prisma'
+import { prisma } from '@/lib/prisma'
 
 // POST /api/rules/[id]/copy - 규칙 복사
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  props: { params: Promise<{ id: string }> }
 ) {
+  const params = await props.params
   try {
     const original = await prisma.rule.findUnique({
       where: { id: params.id }

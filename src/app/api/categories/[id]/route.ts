@@ -4,8 +4,9 @@ import { prisma } from '@/lib/prisma'
 // GET /api/categories/[id] - 카테고리 상세 조회
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  props: { params: Promise<{ id: string }> }
 ) {
+  const params = await props.params
   try {
     const category = await prisma.category.findUnique({
       where: { id: params.id },
@@ -41,8 +42,9 @@ export async function GET(
 // PUT /api/categories/[id] - 카테고리 수정
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  props: { params: Promise<{ id: string }> }
 ) {
+  const params = await props.params
   try {
     const body = await request.json()
 
@@ -68,8 +70,9 @@ export async function PUT(
 // DELETE /api/categories/[id] - 카테고리 삭제
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  props: { params: Promise<{ id: string }> }
 ) {
+  const params = await props.params
   try {
     // Cascade 삭제로 인해 categoryRules도 자동 삭제됨
     await prisma.category.delete({

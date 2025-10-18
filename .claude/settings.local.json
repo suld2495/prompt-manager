@@ -19,7 +19,18 @@
       "Bash(git checkout -b feature/phase2-categories)",
       "Bash(pnpm prisma migrate dev --name add-categories)",
       "Bash(pnpm prisma migrate reset)",
-      "Bash(pnpm prisma migrate reset --force)"
+      "Bash(pnpm prisma migrate reset --force)",
+      "Bash(git commit -m \"feat(phase2): 카테고리 CRUD 구현 완료\n\n✅ 완료된 작업:\n- TASK-001: Prisma 스키마 업데이트 (Category, CategoryRule 모델)\n- TASK-002: 카테고리 타입 정의 추가\n- TASK-003: 카테고리 CRUD API (GET, POST)\n- TASK-004: 카테고리 상세 API (GET, PUT, DELETE, COPY)\n- TASK-005: 카테고리 규칙 관리 API (GET, POST, DELETE)\n- TASK-006: 규칙 순서 변경 API (PUT)\n- TASK-007: 카테고리 목록 페이지\n- TASK-008: 카테고리 편집 페이지\n\n📁 생성된 파일:\n- prisma/schema.prisma (수정)\n- src/types/category.ts\n- src/app/api/categories/route.ts\n- src/app/api/categories/[id]/route.ts\n- src/app/api/categories/[id]/copy/route.ts\n- src/app/api/categories/[id]/rules/route.ts\n- src/app/api/categories/[id]/rules/reorder/route.ts\n- src/app/api/category-rules/[id]/route.ts\n- src/app/categories/page.tsx\n- src/app/categories/[id]/page.tsx\n\n🎯 주요 기능:\n- 카테고리 생성, 조회, 수정, 삭제, 복사\n- 카테고리에 규칙 추가/제거\n- 규칙 순서 변경 (위/아래 이동)\n- 평면 구조 (트리 구조 없음)\n- Cascade 삭제 지원\n\n⚠️ 참고:\n- 데이터베이스 마이그레이션은 별도 실행 필요\n- 명령어: pnpm prisma migrate dev --name add-categories\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude &lt;noreply@anthropic.com&gt;\")",
+      "Bash(git add CLAUDE.md)",
+      "Bash(git commit -m \"docs: CLAUDE.md에 Phase 2 완료 내용 반영\n\n✅ 업데이트 사항:\n- ORM Prisma 구현 완료 표시\n- 데이터베이스 마이그레이션 명령어 추가\n- 구현된 테이블 섹션 분리 (Implemented vs Planned)\n- Phase 1-2 완료 상태 업데이트\n- 프로젝트 구조에 구현된 파일 체크마크 추가\n- API Routes 구현/계획 섹션 분리\n- UI 컴포넌트 설치 완료 표시\n\n📋 Phase 2 완료 내용:\n- 11개 파일 생성 (Prisma 스키마, 타입, 7개 API 라우트, 2개 페이지)\n- 카테고리 CRUD, 규칙 연결 관리, 순서 변경 기능 완성\n- 평면 구조, Cascade 삭제, 트랜잭션 기반 재정렬 구현\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude &lt;noreply@anthropic.com&gt;\")",
+      "Bash(pnpm prisma migrate dev --name add-presets)",
+      "Bash(pnpm prisma generate)",
+      "Bash(pnpm run build)",
+      "Bash(node fix-params.js)",
+      "Bash(npx next build)",
+      "Bash(pnpm install)",
+      "Bash(pnpm approve-builds @prisma/client @prisma/engines)",
+      "Bash(pnpm rebuild @prisma/client)"
     ],
     "deny": [],
     "ask": []

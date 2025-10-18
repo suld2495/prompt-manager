@@ -4,8 +4,9 @@ import { prisma } from '@/lib/prisma'
 // POST /api/categories/[id]/copy - 카테고리 복사
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  props: { params: Promise<{ id: string }> }
 ) {
+  const params = await props.params
   try {
     // 원본 카테고리 조회
     const original = await prisma.category.findUnique({

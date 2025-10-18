@@ -52,7 +52,8 @@ model Category {
   updatedAt DateTime @updatedAt @map("updated_at")
 
   // 관계
-  categoryRules CategoryRule[]
+  categoryRules  CategoryRule[]
+  presetItems    CategoryPresetItem[]
 
   @@map("categories")
 }
@@ -72,4 +73,36 @@ model CategoryRule {
 
   @@unique([categoryId, ruleId])
   @@map("category_rules")
+}
+
+// 카테고리 프리셋 모델
+model CategoryPreset {
+  id          String   @id @default(uuid())
+  name        String
+  description String?  @db.Text
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // 관계
+  presetItems CategoryPresetItem[]
+
+  @@map("category_presets")
+}
+
+// 프리셋-카테고리 연결 테이블
+model CategoryPresetItem {
+  id         String   @id @default(uuid())
+  presetId   String   @map("preset_id")
+  categoryId String   @map("category_id")
+  order      Int      @default(0)
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  // 관계
+  preset   CategoryPreset @relation(fields: [presetId], references: [id], onDelete: Cascade)
+  category Category       @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@unique([presetId, categoryId])
+  @@map("category_preset_items")
 }

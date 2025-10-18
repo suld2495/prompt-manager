@@ -4,8 +4,9 @@ import { prisma } from '@/lib/prisma'
 // GET /api/categories/[id]/rules - 카테고리의 규칙 목록
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  props: { params: Promise<{ id: string }> }
 ) {
+  const params = await props.params
   try {
     const categoryRules = await prisma.categoryRule.findMany({
       where: {
@@ -32,8 +33,9 @@ export async function GET(
 // POST /api/categories/[id]/rules - 카테고리에 규칙 추가
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  props: { params: Promise<{ id: string }> }
 ) {
+  const params = await props.params
   try {
     const body = await request.json()
     const { ruleId } = body

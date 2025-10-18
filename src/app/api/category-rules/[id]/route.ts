@@ -4,8 +4,9 @@ import { prisma } from '@/lib/prisma'
 // DELETE /api/category-rules/[id] - 카테고리에서 규칙 제거
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  props: { params: Promise<{ id: string }> }
 ) {
+  const params = await props.params
   try {
     await prisma.categoryRule.delete({
       where: { id: params.id }

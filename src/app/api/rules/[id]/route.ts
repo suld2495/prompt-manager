@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
-import prisma from '@/lib/prisma'
+import { prisma } from '@/lib/prisma'
 
 // GET /api/rules/[id] - 규칙 상세 조회
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  props: { params: Promise<{ id: string }> }
 ) {
+  const params = await props.params
   try {
     const rule = await prisma.rule.findUnique({
       where: { id: params.id }
@@ -31,8 +32,9 @@ export async function GET(
 // PUT /api/rules/[id] - 규칙 수정 (마스터 업데이트)
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  props: { params: Promise<{ id: string }> }
 ) {
+  const params = await props.params
   try {
     const body = await request.json()
 
@@ -65,8 +67,9 @@ export async function PUT(
 // DELETE /api/rules/[id] - 규칙 삭제
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  props: { params: Promise<{ id: string }> }
 ) {
+  const params = await props.params
   try {
     // Phase 2 이후: 카테고리에서 사용 중인지 확인 필요
     // Phase 5 이후: 스냅샷이 있는지 확인 필요

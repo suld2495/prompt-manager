@@ -4,8 +4,9 @@ import { prisma } from '@/lib/prisma'
 // PUT /api/categories/[id]/rules/reorder - 규칙 순서 변경
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  props: { params: Promise<{ id: string }> }
 ) {
+  const params = await props.params
   try {
     const body = await request.json()
     const { categoryRuleIds } = body
