@@ -14,7 +14,12 @@
       "Bash(cat .env)",
       "Bash(pnpm prisma db push)",
       "Bash(pnpm dev)",
-      "Bash(git add .)"
+      "Bash(git add .)",
+      "Bash(git commit -m \"chore: 초기 프로젝트 설정 (Phase 1 완료 상태)\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude &lt;noreply@anthropic.com&gt;\")",
+      "Bash(git checkout -b feature/phase2-categories)",
+      "Bash(pnpm prisma migrate dev --name add-categories)",
+      "Bash(pnpm prisma migrate reset)",
+      "Bash(pnpm prisma migrate reset --force)"
     ],
     "deny": [],
     "ask": []

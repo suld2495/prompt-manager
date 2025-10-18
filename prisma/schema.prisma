@@ -34,4 +34,42 @@ model Rule {
   notes             String?
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
+
+  // 카테고리 관계
+  categoryRules CategoryRule[]
+
+  @@map("rules")
+}
+
+// 카테고리 모델 (평면 구조)
+model Category {
+  id          String   @id @default(uuid())
+  name        String
+  description String?  @db.Text
+  order       Int      @default(0)
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // 관계
+  categoryRules CategoryRule[]
+
+  @@map("categories")
+}
+
+// 카테고리-규칙 연결 테이블 (다대다 + 순서)
+model CategoryRule {
+  id         String   @id @default(uuid())
+  categoryId String   @map("category_id")
+  ruleId     String   @map("rule_id")
+  order      Int      @default(0)
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  // 관계
+  category Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  rule     Rule     @relation(fields: [ruleId], references: [id], onDelete: Cascade)
+
+  @@unique([categoryId, ruleId])
+  @@map("category_rules")
 }
