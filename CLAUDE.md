@@ -35,7 +35,7 @@ Systematically manage vast AI prompts by breaking them into reusable modules (ru
 - **Styling**: Tailwind CSS 4 + tw-animate-css
 - **UI Components**: shadcn/ui (New York style, using lucide-react icons)
 - **Database**: Supabase (PostgreSQL) via @supabase/supabase-js
-- **ORM**: Prisma (planned, not yet implemented)
+- **ORM**: Prisma (implemented)
 
 ## Development Commands
 
@@ -52,22 +52,47 @@ pnpm start
 
 **Note**: This project uses pnpm exclusively. Do not use npm or yarn.
 
-## Database Schema (Planned)
+## Database Schema
 
-### Core Tables
+### Migration Commands
 
-**rules** - Master rules (always current)
-- Contains: title, priority (critical/warning/info), allowed (boolean), description_detail, example_bad, example_good, violation_action, notes
+```bash
+# Run pending migrations
+pnpm prisma migrate dev --name <migration-name>
+
+# Generate Prisma Client
+pnpm prisma generate
+
+# Reset database (development only)
+pnpm prisma migrate reset --force
+
+# View current database schema
+pnpm prisma studio
+```
+
+### Implemented Tables (Phase 1-2 Complete)
+
+**rules** - Master rules (always current) ✅ Implemented
+- Contains: id, name, description, title, priority (critical/warning/info), allowed (boolean), descriptionDetail, exampleBad, exampleGood, violationAction, notes, createdAt, updatedAt
+- Prisma model: `Rule`
+
+**categories** - Flat structure (no tree hierarchy) ✅ Implemented
+- Contains: id, name, description, order, createdAt, updatedAt
+- Prisma model: `Category`
+- Relations: categoryRules (one-to-many)
+
+**category_rules** - Many-to-many relationship ✅ Implemented
+- Contains: id, categoryId, ruleId, order, createdAt
+- Prisma model: `CategoryRule`
+- Relations: category (many-to-one), rule (many-to-one)
+- Unique constraint: [categoryId, ruleId]
+- Cascade delete: when category or rule is deleted
+
+### Planned Tables (Phase 3-5)
 
 **rule_snapshots** - Frozen rule content from MD generation time
 - Links to: base_rule_id (master), template_id, category_id
 - snapshot_content (jsonb), is_outdated, is_custom
-
-**categories** - Flat structure (no tree hierarchy)
-- Contains: name, description, order
-
-**category_rules** - Many-to-many relationship
-- Links categories to master rules with ordering
 
 **category_presets** - Saved category combinations
 - Contains: name, description
@@ -88,16 +113,62 @@ pnpm start
 ```
 src/
 ├── app/
-│   ├── layout.tsx          # Root layout with Geist fonts
-│   ├── page.tsx            # Homepage (currently default Next.js template)
-│   └── globals.css         # Global styles
+│   ├── layout.tsx                      # Root layout with Geist fonts
+│   ├── page.tsx                        # Homepage
+│   ├── globals.css                     # Global styles
+│   ├── rules/
+│   │   └── page.tsx                    # Rules list page ✅
+│   ├── categories/
+│   │   ├── page.tsx                    # Categories list page ✅
+│   │   └── [id]/
+│   │       └── page.tsx                # Category edit page ✅
+│   └── api/
+│       ├── rules/
+│       │   ├── route.ts                # GET, POST /api/rules ✅
+│       │   └── [id]/
+│       │       ├── route.ts            # GET, PUT, DELETE ✅
+│       │       └── copy/
+│       │           └── route.ts        # POST (copy) ✅
+│       ├── categories/
+│       │   ├── route.ts                # GET, POST /api/categories ✅
+│       │   └── [id]/
+│       │       ├── route.ts            # GET, PUT, DELETE ✅
+│       │       ├── copy/
+│       │       │   └── route.ts        # POST (copy) ✅
+│       │       └── rules/
+│       │           ├── route.ts        # GET, POST (add rule) ✅
+│       │           └── reorder/
+│       │               └── route.ts    # PUT (reorder) ✅
+│       └── category-rules/
+│           └── [id]/
+│               └── route.ts            # DELETE (remove rule) ✅
+├── components/
+│   ├── layout/
+│   │   └── app-layout.tsx              # Main app layout with navigation ✅
+│   ├── rules/
+│   │   └── rule-dialog.tsx             # Rule create/edit dialog ✅
+│   └── ui/                             # shadcn/ui components ✅
 ├── lib/
-│   └── utils.ts            # Utility functions (cn helper for class merging)
-└── components/
-    └── ui/                 # shadcn/ui components (when added)
+│   ├── utils.ts                        # Utility functions
+│   └── prisma.ts                       # Prisma client ✅
+└── types/
+    ├── rule.ts                         # Rule types ✅
+    └── category.ts                     # Category types ✅
+
+prisma/
+└── schema.prisma                       # Database schema ✅
 
 prompt/
-└── 기획서.md               # Detailed project specification in Korean (DO NOT MODIFY)
+└── 기획서.md                            # Project specification (DO NOT MODIFY)
+
+claudedocs/
+├── Phase0-Infrastructure.md
+├── Phase1-Rules.md                     # ✅ Complete
+├── Phase2-Categories.md                # ✅ Complete
+├── Phase3-Presets.md
+├── Phase4-Templates.md
+├── Phase5-Snapshots.md
+└── Phase6-Improvements.md
 ```
 
 ## TypeScript Configuration
@@ -118,17 +189,44 @@ prompt/
 
 ## Development Phases
 
-**Current Status**: Project setup complete, implementation not started
+**Current Status**: Phase 1-2 Complete ✅
 
-### Phase 1: Rules (MVP) - 1 week
-- Rules CRUD with master-only editing
-- 8 rule fields: title, priority, allowed, description_detail, example_bad, example_good, violation_action, notes
-- Basic UI with list + dialog
+### Phase 1: Rules (MVP) ✅ COMPLETE
+**Branch**: `main`
+**Status**: Implemented and tested
 
-### Phase 2: Categories - 1 week
-- Category CRUD (flat structure, no tree)
-- Category-rule linking (references master rules)
-- Add/remove rules UI
+**Completed Features**:
+- ✅ Rules CRUD with master-only editing
+- ✅ 10 rule fields: id, name, description, title, priority, allowed, descriptionDetail, exampleBad, exampleGood, violationAction, notes, timestamps
+- ✅ UI with list page + dialog (create/edit)
+- ✅ Copy functionality
+- ✅ Priority badges (critical/warning/info)
+- ✅ Allowed/forbidden badges
+
+**Files Created**: 8 files
+- Prisma schema, types, API routes (CRUD + copy), UI components
+
+### Phase 2: Categories ✅ COMPLETE
+**Branch**: `feature/phase2-categories` (commit: `7f21b97`)
+**Status**: Implemented and ready for testing
+
+**Completed Features**:
+- ✅ Category CRUD (flat structure, no tree)
+- ✅ Category-rule linking (references master rules)
+- ✅ Add/remove rules UI with master rule selection
+- ✅ Rule reordering (move up/down buttons)
+- ✅ Category copy functionality
+- ✅ Cascade delete (category → category_rules)
+- ✅ Duplicate prevention when adding rules
+- ✅ Transaction-based reordering
+
+**Files Created**: 11 files (1 modified, 10 new)
+- Prisma schema update, category types, 7 API routes, 2 pages
+
+**Next Steps**:
+1. Run database migration: `pnpm prisma migrate dev --name add-categories`
+2. Test all CRUD operations
+3. Merge to main when ready
 
 ### Phase 3: Presets - 1 week
 - Preset CRUD
@@ -191,14 +289,39 @@ When master rule is updated:
       template.outdated_count += 1
 ```
 
-## API Routes (To Be Implemented)
+## API Routes
 
-Expected structure:
-- `/api/rules` - CRUD for master rules
-- `/api/categories` - CRUD for categories
-- `/api/categories/[id]/rules` - Manage category-rule relationships
+### Implemented Routes (Phase 1-2)
+
+**Rules API** ✅
+- `GET /api/rules` - List all rules
+- `POST /api/rules` - Create new rule
+- `GET /api/rules/[id]` - Get rule by ID
+- `PUT /api/rules/[id]` - Update rule
+- `DELETE /api/rules/[id]` - Delete rule
+- `POST /api/rules/[id]/copy` - Copy rule
+
+**Categories API** ✅
+- `GET /api/categories` - List all categories (with rule counts)
+- `POST /api/categories` - Create new category
+- `GET /api/categories/[id]` - Get category by ID (with rules)
+- `PUT /api/categories/[id]` - Update category
+- `DELETE /api/categories/[id]` - Delete category (cascade)
+- `POST /api/categories/[id]/copy` - Copy category (with rules)
+
+**Category-Rules API** ✅
+- `GET /api/categories/[id]/rules` - List rules in category
+- `POST /api/categories/[id]/rules` - Add rule to category
+- `PUT /api/categories/[id]/rules/reorder` - Reorder rules (transaction)
+- `DELETE /api/category-rules/[id]` - Remove rule from category
+
+### Planned Routes (Phase 3-5)
+
+**Presets API**
 - `/api/presets` - CRUD for category presets
 - `/api/presets/[id]/categories` - Manage preset-category relationships
+
+**Templates API**
 - `/api/templates` - CRUD for templates
 - `/api/templates/[id]/categories` - Manage template-category relationships
 - `/api/templates/[id]/generate` - Generate MD with snapshot creation
@@ -206,16 +329,23 @@ Expected structure:
 
 ## UI Component Requirements
 
-shadcn/ui components needed:
-- button
-- input
-- textarea
-- dialog
-- toast
-- select
-- badge
-- card
-- table
+### Installed Components ✅
+- ✅ button
+- ✅ input
+- ✅ textarea
+- ✅ dialog
+- ✅ sonner (toast)
+- ✅ select
+- ✅ badge
+- ✅ card
+- ✅ table
+- ✅ label
+
+### To Be Added (Phase 3+)
+- tabs
+- accordion
+- separator
+- tooltip
 
 ## Important Constraints
 
