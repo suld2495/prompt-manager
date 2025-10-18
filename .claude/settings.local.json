@@ -1,0 +1,22 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__sequential-thinking__sequentialthinking",
+      "Bash(git log:*)",
+      "Bash(mkdir:*)",
+      "Bash(pnpm test:*)",
+      "Bash(pnpm add prisma @prisma/client)",
+      "Bash(pnpm add -D prisma)",
+      "Bash(pnpm prisma init)",
+      "Bash(pnpm dlx shadcn@latest add button dialog input textarea toast select badge card table label)",
+      "Bash(pnpm dlx shadcn@latest add button dialog input textarea sonner select badge card table label)",
+      "Bash(pnpm prisma migrate dev --name init)",
+      "Bash(cat .env)",
+      "Bash(pnpm prisma db push)",
+      "Bash(pnpm dev)",
+      "Bash(git add .)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

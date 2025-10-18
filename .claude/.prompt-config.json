@@ -1,0 +1,26 @@
+{
+  "version": "1.0.0",
+  "workflow": {
+    "steps": [
+      "analyze",
+      "plan",
+      "branch",
+      "develop",
+      "review",
+      "finalize"
+    ]
+  },
+  "prompts": {
+    "orchestrator": ".commands/core/orchestrator.md",
+    "taskAnalyzer": ".commandsprompts/core/task-analyzer.md",
+    "planner": ".commands/specialists/planner.md",
+    "reviewer": ".commands/core/code-reviewer.md"
+  },
+  "context": {
+    "shared": [
+      ".commands/shared/conventions.md",
+      ".commands/shared/project-context.md",
+      ".commands/shared/tech-stack.md"
+    ]
+  }
+}
