@@ -29,7 +29,7 @@ export async function GET(
   }
 }
 
-// PUT /api/rules/[id] - 규칙 수정 (마스터 업데이트)
+// PUT /api/rules/[id] - 규칙 수정 (마스터 업데이트 + 스냅샷 변경 감지)
 export async function PUT(
   request: NextRequest,
   props: { params: Promise<{ id: string }> }
@@ -38,23 +38,64 @@ export async function PUT(
   try {
     const body = await request.json()
 
-    const rule = await prisma.rule.update({
-      where: { id: params.id },
-      data: {
-        name: body.name,
-        description: body.description,
-        title: body.title,
-        priority: body.priority,
-        allowed: body.allowed,
-        descriptionDetail: body.descriptionDetail,
-        exampleBad: body.exampleBad,
-        exampleGood: body.exampleGood,
-        violationAction: body.violationAction,
-        notes: body.notes,
+    // 트랜잭션으로 규칙 업데이트 + 스냅샷 변경 감지
+    const result = await prisma.$transaction(async (tx) => {
+      // 규칙 업데이트
+      const updatedRule = await tx.rule.update({
+        where: { id: params.id },
+        data: {
+          name: body.name,
+          description: body.description,
+          title: body.title,
+          priority: body.priority,
+          allowed: body.allowed,
+          descriptionDetail: body.descriptionDetail,
+          exampleBad: body.exampleBad,
+          exampleGood: body.exampleGood,
+          violationAction: body.violationAction,
+          notes: body.notes,
+        }
+      })
+
+      // 이 규칙의 모든 스냅샷 찾기
+      const snapshots = await tx.ruleSnapshot.findMany({
+        where: { baseRuleId: params.id }
+      })
+
+      // 각 스냅샷을 체크하여 outdated 플래그 업데이트
+      for (const snapshot of snapshots) {
+        const snapshotContent = snapshot.snapshotContent as any
+
+        // 내용이 변경되었는지 확인
+        const isContentChanged =
+          snapshotContent.title !== updatedRule.title ||
+          snapshotContent.priority !== updatedRule.priority ||
+          snapshotContent.allowed !== updatedRule.allowed ||
+          snapshotContent.descriptionDetail !== updatedRule.descriptionDetail ||
+          snapshotContent.exampleBad !== updatedRule.exampleBad ||
+          snapshotContent.exampleGood !== updatedRule.exampleGood ||
+          snapshotContent.violationAction !== updatedRule.violationAction ||
+          snapshotContent.notes !== updatedRule.notes
+
+        // 커스텀이 아니고 내용이 변경되었으며 아직 outdated로 표시되지 않았다면
+        if (isContentChanged && !snapshot.isOutdated && !snapshot.isCustom) {
+          await tx.ruleSnapshot.update({
+            where: { id: snapshot.id },
+            data: { isOutdated: true }
+          })
+
+          // 템플릿의 outdatedCount 증가
+          await tx.template.update({
+            where: { id: snapshot.templateId },
+            data: { outdatedCount: { increment: 1 } }
+          })
+        }
       }
+
+      return updatedRule
     })
 
-    return NextResponse.json(rule)
+    return NextResponse.json(result)
   } catch (error) {
     console.error('규칙 수정 실패:', error)
     return NextResponse.json(

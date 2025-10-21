@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -9,6 +9,8 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
+import { SearchInput } from '@/components/search-input'
+import { CardSkeleton } from '@/components/skeleton-loader'
 import { toast } from 'sonner'
 import type { CategoryWithRules } from '@/types/category'
 
@@ -20,6 +22,7 @@ export default function CategoriesPage() {
   const [newCategoryName, setNewCategoryName] = useState('')
   const [newCategoryDescription, setNewCategoryDescription] = useState('')
   const [isCreating, setIsCreating] = useState(false)
+  const [searchQuery, setSearchQuery] = useState('')
 
   useEffect(() => {
     fetchCategories()
@@ -101,10 +104,22 @@ export default function CategoriesPage() {
     }
   }
 
+  // 검색 필터링
+  const filteredCategories = useMemo(() => {
+    if (!searchQuery) return categories
+
+    const query = searchQuery.toLowerCase()
+    return categories.filter(
+      (category) =>
+        category.name.toLowerCase().includes(query) ||
+        category.description?.toLowerCase().includes(query)
+    )
+  }, [categories, searchQuery])
+
   if (isLoading) {
     return (
       <div className="container mx-auto py-8">
-        <p>로딩 중...</p>
+        <CardSkeleton count={6} />
       </div>
     )
   }
@@ -114,7 +129,7 @@ export default function CategoriesPage() {
       <div className="flex items-center justify-between mb-8">
         <div>
           <h1 className="text-3xl font-bold">카테고리 관리</h1>
-          <p className="text-muted-foreground mt-2">규칙을 그룹화하는 카테고리를 관리합니다.</p>
+          <p className="text-muted-foreground mt-2">규칙을 그룹화하는 카테고리를 관리합니다 ({filteredCategories.length}개)</p>
         </div>
         <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
           <DialogTrigger asChild>
@@ -163,7 +178,14 @@ export default function CategoriesPage() {
         </Dialog>
       </div>
 
-      {categories.length === 0 ? (
+      <div className="mb-6">
+        <SearchInput
+          placeholder="카테고리 검색 (이름, 설명)"
+          onSearch={setSearchQuery}
+        />
+      </div>
+
+      {filteredCategories.length === 0 ? (
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-12">
             <p className="text-muted-foreground mb-4">아직 카테고리가 없습니다.</p>
@@ -174,7 +196,7 @@ export default function CategoriesPage() {
         </Card>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {categories.map((category) => (
+          {filteredCategories.map((category) => (
             <Card
               key={category.id}
               className="cursor-pointer hover:shadow-lg transition-shadow"

@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, useMemo } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -8,6 +8,8 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
+import { SearchInput } from "@/components/search-input"
+import { TableSkeleton } from "@/components/skeleton-loader"
 import { toast } from "sonner"
 import type { CategoryPresetWithItems } from "@/types/preset"
 
@@ -17,6 +19,7 @@ export default function PresetsPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [isCreating, setIsCreating] = useState(false)
   const [newPreset, setNewPreset] = useState({ name: "", description: "" })
+  const [searchQuery, setSearchQuery] = useState("")
 
   const fetchPresets = async () => {
     try {
@@ -100,12 +103,24 @@ export default function PresetsPage() {
     )
   }
 
+  // 검색 필터링
+  const filteredPresets = useMemo(() => {
+    if (!searchQuery) return presets
+
+    const query = searchQuery.toLowerCase()
+    return presets.filter(
+      (preset) =>
+        preset.name.toLowerCase().includes(query) ||
+        preset.description?.toLowerCase().includes(query)
+    )
+  }, [presets, searchQuery])
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">📦 카테고리 프리셋</h1>
-          <p className="text-muted-foreground">자주 사용하는 카테고리 조합을 관리합니다</p>
+          <p className="text-muted-foreground">자주 사용하는 카테고리 조합을 관리합니다 ({filteredPresets.length}개)</p>
         </div>
 
         <Dialog>
@@ -152,9 +167,16 @@ export default function PresetsPage() {
         </Dialog>
       </div>
 
+      <div className="space-y-4">
+        <SearchInput
+          placeholder="프리셋 검색 (이름, 설명)"
+          onSearch={setSearchQuery}
+        />
+      </div>
+
       {isLoading ? (
-        <p>로딩 중...</p>
-      ) : presets.length === 0 ? (
+        <TableSkeleton rows={5} />
+      ) : filteredPresets.length === 0 ? (
         <Card>
           <CardContent className="pt-6">
             <p className="text-center text-muted-foreground">
@@ -164,7 +186,7 @@ export default function PresetsPage() {
         </Card>
       ) : (
         <div className="grid gap-4">
-          {presets.map((preset) => (
+          {filteredPresets.map((preset) => (
             <Card key={preset.id}>
               <CardHeader>
                 <div className="flex items-start justify-between">

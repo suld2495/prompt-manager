@@ -50,7 +50,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
           })}
         </nav>
       </aside>
-      <main className="flex-1 overflow-auto">
+      <main className="flex-1 overflow-auto pl-10">
         <div className="container py-6">{children}</div>
       </main>
     </div>

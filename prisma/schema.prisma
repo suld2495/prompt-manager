@@ -35,8 +35,9 @@ model Rule {
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
 
-  // 카테고리 관계
+  // 관계
   categoryRules CategoryRule[]
+  snapshots     RuleSnapshot[]
 
   @@map("rules")
 }
@@ -52,8 +53,10 @@ model Category {
   updatedAt DateTime @updatedAt @map("updated_at")
 
   // 관계
-  categoryRules  CategoryRule[]
-  presetItems    CategoryPresetItem[]
+  categoryRules     CategoryRule[]
+  presetItems       CategoryPresetItem[]
+  templateCategories TemplateCategory[]
+  snapshots         RuleSnapshot[]
 
   @@map("categories")
 }
@@ -85,7 +88,8 @@ model CategoryPreset {
   updatedAt DateTime @updatedAt @map("updated_at")
 
   // 관계
-  presetItems CategoryPresetItem[]
+  presetItems       CategoryPresetItem[]
+  templateCategories TemplateCategory[]
 
   @@map("category_presets")
 }
@@ -105,4 +109,63 @@ model CategoryPresetItem {
 
   @@unique([presetId, categoryId])
   @@map("category_preset_items")
+}
+
+// 템플릿 모델
+model Template {
+  id              String    @id @default(uuid())
+  name            String
+  description     String?   @db.Text
+  hasSnapshots    Boolean   @default(false) @map("has_snapshots")
+  lastGeneratedAt DateTime? @map("last_generated_at")
+  outdatedCount   Int       @default(0) @map("outdated_count")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // 관계
+  templateCategories TemplateCategory[]
+  snapshots          RuleSnapshot[]
+
+  @@map("templates")
+}
+
+// 템플릿-카테고리 연결 테이블
+model TemplateCategory {
+  id           String  @id @default(uuid())
+  templateId   String  @map("template_id")
+  categoryId   String  @map("category_id")
+  order        Int     @default(0)
+  fromPresetId String? @map("from_preset_id")
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  // 관계
+  template Template        @relation(fields: [templateId], references: [id], onDelete: Cascade)
+  category Category        @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  preset   CategoryPreset? @relation(fields: [fromPresetId], references: [id], onDelete: SetNull)
+
+  @@unique([templateId, categoryId])
+  @@map("template_categories")
+}
+
+// 규칙 스냅샷 모델
+model RuleSnapshot {
+  id              String   @id @default(uuid())
+  baseRuleId      String   @map("base_rule_id")
+  templateId      String   @map("template_id")
+  categoryId      String   @map("category_id")
+  snapshotContent Json     @map("snapshot_content")
+  isOutdated      Boolean  @default(false) @map("is_outdated")
+  isCustom        Boolean  @default(false) @map("is_custom")
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  // 관계
+  baseRule Rule     @relation(fields: [baseRuleId], references: [id], onDelete: Cascade)
+  template Template @relation(fields: [templateId], references: [id], onDelete: Cascade)
+  category Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@unique([templateId, categoryId, baseRuleId])
+  @@map("rule_snapshots")
 }
