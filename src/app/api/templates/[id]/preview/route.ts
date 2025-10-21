@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import type { Prisma, Priority } from '@prisma/client'
 
 // GET /api/templates/[id]/preview - MD 미리보기
 export async function GET(
@@ -65,7 +66,31 @@ export async function GET(
   }
 }
 
-function generateMarkdown(template: any): string {
+type TemplateWithRelations = Prisma.TemplateGetPayload<{
+  include: {
+    templateCategories: {
+      include: {
+        category: {
+          include: {
+            categoryRules: {
+              include: {
+                rule: true
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}>
+
+const priorityIconMap: Record<Priority, string> = {
+  critical: '🔴',
+  warning: '🟡',
+  info: '🔵'
+}
+
+function generateMarkdown(template: TemplateWithRelations): string {
   let md = `# ${template.name}\n\n`
 
   if (template.description) {
@@ -89,11 +114,7 @@ function generateMarkdown(template: any): string {
       const rule = cr.rule
 
       // 우선순위 아이콘
-      const priorityIcon = {
-        critical: '🔴',
-        warning: '🟡',
-        info: '🔵'
-      }[rule.priority]
+      const priorityIcon = priorityIconMap[rule.priority]
 
       // 허용/비허용
       const allowedText = rule.allowed ? '✅ 허용' : '❌ 비허용'
