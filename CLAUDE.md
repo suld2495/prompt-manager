@@ -189,7 +189,8 @@ claudedocs/
 ├── Phase1-Rules.md                     # ✅ Complete
 ├── Phase2-Categories.md                # ✅ Complete
 ├── Phase3-Presets.md                   # ✅ Complete
-├── Phase4-Templates.md
+├── Phase4-Templates.md                 # ✅ Complete
+├── Phase4-Complete.md                  # ✅ Implementation summary
 ├── Phase5-Snapshots.md
 └── Phase6-Improvements.md
 ```
@@ -212,7 +213,7 @@ claudedocs/
 
 ## Development Phases
 
-**Current Status**: Phase 1-3 Complete ✅
+**Current Status**: Phase 1-4 Complete ✅ (First Full Workflow Complete!)
 
 ### Phase 1: Rules (MVP) ✅ COMPLETE
 **Branch**: `main`
@@ -277,12 +278,30 @@ claudedocs/
 2. Test all preset operations in dev mode
 3. Monitor Next.js/Prisma updates for build fix
 
-### Phase 4: Templates - 1 week
-- Template CRUD
-- Add preset functionality (adds all preset categories at once)
-- Add individual category functionality
-- Show source (preset vs direct addition)
-- MD generation/preview/download
+### Phase 4: Templates ✅ COMPLETE
+**Status**: Implemented and tested in dev mode
+
+**Completed Features**:
+- ✅ Template CRUD (create, read, update, delete, copy)
+- ✅ Add entire preset (all categories at once with fromPresetId tracking)
+- ✅ Add individual categories (without preset reference)
+- ✅ Remove categories from template
+- ✅ Reorder categories (up/down with transaction-based swapping)
+- ✅ MD generation with complete formatting (priority icons, code examples)
+- ✅ MD preview (no save)
+- ✅ MD download as .md file
+- ✅ Track source (preset vs direct addition)
+- ✅ Duplicate prevention when adding categories
+- ✅ lastGeneratedAt timestamp tracking
+
+**Files Created**: 13 files
+- Prisma schema update (Template, TemplateCategory models)
+- template.ts types
+- 9 API routes (CRUD, copy, add-preset, category management, reorder, preview, generate)
+- 2 pages (list, edit)
+- Phase4-Complete.md documentation
+
+**Key Achievement**: **First complete workflow from Rules → Categories → Presets → Templates → MD File!**
 
 ### Phase 5: Snapshot Management - 1 week
 - Create snapshots on MD generation
@@ -335,7 +354,7 @@ When master rule is updated:
 
 ## API Routes
 
-### Implemented Routes (Phase 1-3)
+### Implemented Routes (Phase 1-4)
 
 **Rules API** ✅
 - `GET /api/rules` - List all rules
@@ -370,13 +389,26 @@ When master rule is updated:
 - `POST /api/presets/[id]/categories` - Add category to preset
 - `DELETE /api/presets/[id]/categories/[categoryId]` - Remove category from preset
 
-### Planned Routes (Phase 4-5)
+**Templates API** ✅
+- `GET /api/templates` - List all templates (with category and rule counts)
+- `POST /api/templates` - Create new template
+- `GET /api/templates/[id]` - Get template by ID (with categories and rules)
+- `PUT /api/templates/[id]` - Update template
+- `DELETE /api/templates/[id]` - Delete template (cascade)
+- `POST /api/templates/[id]/copy` - Copy template (with categories)
+- `POST /api/templates/[id]/add-preset` - Add entire preset to template
+- `GET /api/templates/[id]/categories` - List categories in template
+- `POST /api/templates/[id]/categories` - Add individual category to template
+- `DELETE /api/templates/[id]/categories/[categoryId]` - Remove category from template
+- `PUT /api/templates/[id]/categories/reorder` - Reorder categories (up/down)
+- `GET /api/templates/[id]/preview` - Preview MD without saving
+- `POST /api/templates/[id]/generate` - Generate and download MD file
 
-**Templates API**
-- `/api/templates` - CRUD for templates
-- `/api/templates/[id]/categories` - Manage template-category relationships
-- `/api/templates/[id]/generate` - Generate MD with snapshot creation
+### Planned Routes (Phase 5)
+
+**Snapshots API**
 - `/api/templates/[id]/snapshots` - Manage snapshot updates
+- `/api/snapshots/[id]` - Update/customize individual snapshots
 
 ## UI Component Requirements
 
